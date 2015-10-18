@@ -48,6 +48,9 @@ help='Upgrade kernel installed')
 parser.add_argument('-y', '--daily', action='store_true',
 help='Download daily build kernel (with next patches)')
 args = parser.parse_args()
+parser.add_argument('-w', '--lowlatency', action='store_true',
+help='Downloads lowlatency kernel')
+args = parser.parse_args()
 print(args)
 
 url = "http://kernel.ubuntu.com/~kernel-ppa/mainline/"
@@ -60,32 +63,10 @@ kernels = list()
 
 rel = re.sub('-\w*', '', platform.release())
 print("Current system kernel release version: {0}".format(rel))
-previous_version = [-1,-1,-1,-1]
+previous_ver = re.split('\.', rel)
 previous_href = ""
 upgrade = ""
 actual_ver = []
-
-if args.update:
-	level = 0
-	k = 0
-	try:
-		actual_ver.append("")
-		while(True):
-			char = rel[k]
-			if char == ".":
-				level += 1
-				actual_ver.append("")
-			elif char == "-":
-				break
-			else:
-				actual_ver[level] += str(rel[k])
-			k += 1
-	except IndexError:
-		pass
-
-if args.daily:
-    # args.disable_filter = True
-    pass
 
 if args.update:
     args.latest_ver = True
@@ -293,7 +274,20 @@ else:
 	#Create temp folder
 	tempfolder = tempfile.mkdtemp()
 	print("Using temporary folder: {0}".format(tempfolder))
-
+	re_lowlatency = re.compile('.*lowlatency.*')
+	re_generic = re.compile('.*generic.*')
+	files2 = []
+	for url in files:
+		if args.lowlatency:
+			coincidence = re_lowlatency.match(url)
+			if coincidence:
+				files2.append(coincidence.group())
+		else:
+			coincidence = re_generic.match(url)
+			if coincidence:
+				files2.append(coincidence.group())
+	files = files2
+	print files
 	for url in files:
 	    #Change directory to temp folder
 	    os.chdir(tempfolder)
