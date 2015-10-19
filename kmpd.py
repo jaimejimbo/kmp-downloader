@@ -63,7 +63,7 @@ kernels = list()
 
 rel = re.sub('-\w*', '', platform.release())
 print("Current system kernel release version: {0}".format(rel))
-previous_ver = re.split('\.', rel)
+previous_ver = re.split('\.', rel) 
 previous_href = ""
 upgrade = ""
 actual_ver = []
@@ -94,23 +94,7 @@ for link in soup.find_all('a'):
 						  kernels.append(href)
 			else:
 				if href[0] == "v":
-					level = 0
-					k = 1
-					version = []
-					try:
-						version.append("")
-						while(True):
-							char = href[k]
-							if char == ".":
-								level += 1
-								version.append("")
-							elif char == "-":
-								break
-							else:
-								version[level] += str(href[k])
-							k += 1
-					except IndexError:
-						pass
+					version = re.strip('\.',href[1:-1])
 					if not args.update:
 						selk = 0
 						if int(version[0]) > int(previous_version[0]):
@@ -123,17 +107,9 @@ for link in soup.find_all('a'):
 						previous_href = href
 					else:
 						if int(version[0]) == int(actual_ver[0]) and int(version[1]) == int(actual_ver[1]):
-							if int(version[0]) == 2:
-								if int(version[2]) == int(actual_ver[2]):
-									if int(version[3]) > int(actual_ver[3]):
-										selk = href
-							else:
-								try:
-									if int(version[2]) > int(actual_ver[2]):
-										kernels = [href]
-										selk = 1
-								except:
-									pass
+							if int(version[2]) > int(actual_ver[2]):
+								kernels = [href]
+								selk = 1
     else:
         selk = 0
         kernels.append(href)
