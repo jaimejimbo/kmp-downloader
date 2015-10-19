@@ -48,6 +48,9 @@ help='Upgrade kernel installed')
 parser.add_argument('-y', '--daily', action='store_true',
 help='Download daily build kernel (with next patches)')
 args = parser.parse_args()
+parser.add_argument('-w', '--lowlatency', action='store_true',
+help='Downloads lowlatency kernel')
+args = parser.parse_args()
 print(args)
 
 url = "http://kernel.ubuntu.com/~kernel-ppa/mainline/"
@@ -60,32 +63,14 @@ kernels = list()
 
 rel = re.sub('-\w*', '', platform.release())
 print("Current system kernel release version: {0}".format(rel))
+<<<<<<< HEAD
 release = re.sub('([0-9])\.([0-9]{1,2})\.([0-9]{1,2})','',rel);
+=======
+previous_ver = re.split('\.', rel) 
+>>>>>>> stable
 previous_href = ""
 upgrade = ""
 actual_ver = []
-
-if args.update:
-	level = 0
-	k = 0
-	try:
-		actual_ver.append("")
-		while(True):
-			char = rel[k]
-			if char == ".":
-				level += 1
-				actual_ver.append("")
-			elif char == "-":
-				break
-			else:
-				actual_ver[level] += str(rel[k])
-			k += 1
-	except IndexError:
-		pass
-
-if args.daily:
-    # args.disable_filter = True
-    pass
 
 if args.update:
     args.latest_ver = True
@@ -113,23 +98,7 @@ for link in soup.find_all('a'):
 						  kernels.append(href)
 			else:
 				if href[0] == "v":
-					level = 0
-					k = 1
-					version = []
-					try:
-						version.append("")
-						while(True):
-							char = href[k]
-							if char == ".":
-								level += 1
-								version.append("")
-							elif char == "-":
-								break
-							else:
-								version[level] += str(href[k])
-							k += 1
-					except IndexError:
-						pass
+					version = re.strip('\.',href[1:-1])
 					if not args.update:
 						selk = 0
 						if int(version[0]) > int(previous_version[0]):
@@ -142,17 +111,9 @@ for link in soup.find_all('a'):
 						previous_href = href
 					else:
 						if int(version[0]) == int(actual_ver[0]) and int(version[1]) == int(actual_ver[1]):
-							if int(version[0]) == 2:
-								if int(version[2]) == int(actual_ver[2]):
-									if int(version[3]) > int(actual_ver[3]):
-										selk = href
-							else:
-								try:
-									if int(version[2]) > int(actual_ver[2]):
-										kernels = [href]
-										selk = 1
-								except:
-									pass
+							if int(version[2]) > int(actual_ver[2]):
+								kernels = [href]
+								selk = 1
     else:
         selk = 0
         kernels.append(href)
@@ -293,7 +254,20 @@ else:
 	#Create temp folder
 	tempfolder = tempfile.mkdtemp()
 	print("Using temporary folder: {0}".format(tempfolder))
-
+	re_lowlatency = re.compile('.*lowlatency.*')
+	re_generic = re.compile('.*generic.*')
+	files2 = []
+	for url in files:
+		if args.lowlatency:
+			coincidence = re_lowlatency.match(url)
+			if coincidence:
+				files2.append(coincidence.group())
+		else:
+			coincidence = re_generic.match(url)
+			if coincidence:
+				files2.append(coincidence.group())
+	files = files2
+	print files
 	for url in files:
 	    #Change directory to temp folder
 	    os.chdir(tempfolder)
