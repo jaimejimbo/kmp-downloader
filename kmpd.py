@@ -47,7 +47,6 @@ parser.add_argument('-u', '--update', action='store_true',
 help='Upgrade kernel installed')
 parser.add_argument('-y', '--daily', action='store_true',
 help='Download daily build kernel (with next patches)')
-args = parser.parse_args()
 parser.add_argument('-w', '--lowlatency', action='store_true',
 help='Downloads lowlatency kernel')
 args = parser.parse_args()
@@ -63,11 +62,8 @@ kernels = list()
 
 rel = re.sub('-\w*', '', platform.release())
 print("Current system kernel release version: {0}".format(rel))
-<<<<<<< HEAD
 release = re.sub('([0-9])\.([0-9]{1,2})\.([0-9]{1,2})','',rel);
-=======
 previous_ver = re.split('\.', rel) 
->>>>>>> stable
 previous_href = ""
 upgrade = ""
 actual_ver = []
